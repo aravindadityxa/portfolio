@@ -270,11 +270,21 @@ body {
     opacity: 0;
 }
 
+.hero-image::before {
+    content: '';
+    position: absolute;
+    width: 340px;
+    height: 340px;
+    border-radius: 50%;
+    border: 2px solid rgba(61, 169, 252, 0.25);
+    z-index: 0;
+}
+
 /* Profile Glow Effect */
 .profile-glow {
     position: absolute;
-    width: 280px;
-    height: 280px;
+    width: 350px;
+    height: 350px;
     background: radial-gradient(circle, 
         rgba(61, 169, 252, 0.25) 0%, 
         rgba(61, 169, 252, 0.15) 30%, 
@@ -290,9 +300,10 @@ body {
     height: 310px;
     border-radius: 50%;
     object-fit: cover;
+    object-position: center;
     position: relative;
     z-index: 1;
-    border: 2px solid rgba(61, 169, 252, 0.25);
+    border: none;
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -967,13 +978,18 @@ body {
     }
     
     .profile-glow {
-        width: 240px;
-        height: 240px;
+        width: 310px;
+        height: 310px;
+    }
+    
+    .hero-image::before {
+        width: 300px;
+        height: 300px;
     }
     
     .profile-image {
-        width: 200px;
-        height: 200px;
+        width: 260px;
+        height: 260px;
     }
 }
 
@@ -987,13 +1003,18 @@ body {
     }
     
     .profile-glow {
-        width: 200px;
-        height: 200px;
+        width: 270px;
+        height: 270px;
+    }
+    
+    .hero-image::before {
+        width: 260px;
+        height: 260px;
     }
     
     .profile-image {
-        width: 180px;
-        height: 180px;
+        width: 220px;
+        height: 220px;
     }
 }
 
