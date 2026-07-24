@@ -1,0 +1,56 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Backend
+backend/.env
+backend/venv/
+backend/env/
+backend/__pycache__/
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+
+# IDE and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Testing and Logs
+.coverage
+htmlcov/
+*.log
+logs/
+
+# Build artifacts
+*.pem
+*.key
+*.crt
+dist/
+build/

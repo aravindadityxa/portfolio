@@ -94,24 +94,130 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Simple validation
             if (!data.name || !data.email || !data.message) {
-                alert('Please fill in all fields.');
+                showFormMessage('Please fill in all fields.', 'error');
                 return;
             }
             
             // Email validation
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(data.email)) {
-                alert('Please enter a valid email address.');
+                showFormMessage('Please enter a valid email address.', 'error');
                 return;
             }
             
-            // In a real implementation, you would send this data to a server
-            // For demo purposes, we'll just show an alert
-            alert(`Thank you for your message, ${data.name}! I'll get back to you soon at ${data.email}.`);
-            
-            // Reset the form
-            this.reset();
+            // Submit form to backend
+            submitContactForm(data, this);
         });
+    }
+    
+    // Function to submit contact form to backend
+    async function submitContactForm(data, formElement) {
+        const apiUrl = window.CONTACT_API_URL || 'http://localhost:8000/api/contact';
+        const submitButton = formElement.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.textContent;
+        
+        try {
+            // Show loading state
+            submitButton.disabled = true;
+            submitButton.textContent = 'Sending...';
+            showFormMessage('Sending your message...', 'loading');
+            
+            // Send request to backend
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: data.name,
+                    email: data.email,
+                    message: data.message
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+                // Success
+                showFormMessage(
+                    result.message || 'Thank you for your message! I\'ll get back to you soon.',
+                    'success'
+                );
+                formElement.reset();
+                
+                // Reset button after a delay
+                setTimeout(() => {
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalButtonText;
+                }, 2000);
+            } else {
+                // Error from backend
+                showFormMessage(
+                    result.detail || 'An error occurred while sending your message. Please try again.',
+                    'error'
+                );
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            }
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            
+            // Show error message
+            let errorMessage = 'Network error. Please check your connection and try again.';
+            if (error.message === 'Failed to fetch') {
+                errorMessage = 'Unable to connect to the server. Please ensure the backend is running.';
+            }
+            
+            showFormMessage(errorMessage, 'error');
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
+        }
+    }
+    
+    // Function to display form messages
+    function showFormMessage(message, type = 'info') {
+        // Remove existing message if any
+        const existingMessage = document.querySelector('.form-message');
+        if (existingMessage) {
+            existingMessage.remove();
+        }
+        
+        // Create message element
+        const messageEl = document.createElement('div');
+        messageEl.className = `form-message form-message-${type}`;
+        messageEl.textContent = message;
+        
+        // Insert before form or after
+        const contactForm = document.getElementById('contact-form');
+        if (contactForm) {
+            contactForm.parentElement.insertBefore(messageEl, contactForm);
+        }
+        
+        // Auto-remove success and loading messages after delay
+        if (type === 'success') {
+            setTimeout(() => {
+                messageEl.remove();
+            }, 5000);
+        }
+        
+        if (type === 'loading') {
+            // Keep loading message until replaced
+        }
+    }
+    
+    // Set API URL (can be overridden by setting window.CONTACT_API_URL)
+    // Default: http://localhost:8000/api/contact (development)
+    // For production, set to your deployed backend URL
+    if (!window.CONTACT_API_URL) {
+        // Auto-detect: use same domain if backend is at /api
+        const protocol = window.location.protocol;
+        const host = window.location.host;
+        window.CONTACT_API_URL = `${protocol}//${host}/api/contact`;
+        
+        // Fallback for development
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            window.CONTACT_API_URL = 'http://localhost:8000/api/contact';
+        }
     }
     
     // Navbar scroll effect
