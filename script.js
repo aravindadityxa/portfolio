@@ -230,6 +230,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (scrollTop > lastScrollTop && scrollTop > 100) {
             // Scrolling down
             navbar.style.transform = 'translateY(-100%)';
+            navbar.style.boxShadow = 'none';
         } else {
             // Scrolling up
             navbar.style.transform = 'translateY(0)';
@@ -237,9 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Add shadow when scrolled
         if (scrollTop > 50) {
-            navbar.style.boxShadow = '0 5px 20px rgba(0, 0, 0, 0.2)';
-        } else {
-            navbar.style.boxShadow = 'none';
+            navbar.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.2)';
         }
         
         lastScrollTop = scrollTop;
@@ -296,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize animations on page load
     setTimeout(() => {
         triggerScrollAnimations();
-    }, 300);
+    }, 250);
     
     // Add CSS for active nav link
     const style = document.createElement('style');
@@ -309,13 +308,20 @@ document.addEventListener('DOMContentLoaded', function() {
             width: 100% !important;
         }
         
-        /* Add smooth transitions for grid items */
         .internship-card,
         .certification-card,
         .project-card,
         .skill-category,
         .education-card {
             transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+        
+        .contact-item {
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .profile-image {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
     `;
     document.head.appendChild(style);
