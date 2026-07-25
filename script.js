@@ -119,6 +119,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const submitButton = formElement.querySelector('button[type="submit"]');
         const originalButtonText = submitButton.textContent;
         
+        console.log("Submitting to:", apiUrl);
+        console.log("Request data:", { name: data.name, email: data.email, message: data.message });
+        
         try {
             // Show loading state
             submitButton.disabled = true;
@@ -138,9 +141,66 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
             });
             
-            const result = await response.json();
+            console.log("Response status:", response.status);
+            console.log("Response ok:", response.ok);
+            console.log("Content-Type:", response.headers.get('content-type'));
             
-            if (response.ok && result.success) {
+            // Check if response is OK before parsing JSON
+            if (!response.ok) {
+                let errorMessage = 'An error occurred while sending your message. Please try again.';
+                
+                if (response.status === 429) {
+                    errorMessage = 'Too many requests. Please wait a moment and try again.';
+                } else if (response.status === 422) {
+                    errorMessage = 'Invalid email address. Please check and try again.';
+                } else if (response.status === 405) {
+                    errorMessage = 'Server error (Method Not Allowed). Please contact support.';
+                } else if (response.status >= 500) {
+                    errorMessage = 'Server error. Please try again later.';
+                } else if (response.status >= 400) {
+                    errorMessage = `Server error (${response.status}). Please try again.`;
+                }
+                
+                // Try to parse error details from JSON response
+                try {
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const errorData = await response.json();
+                        if (errorData.detail) {
+                            errorMessage = errorData.detail;
+                        }
+                    }
+                } catch (parseError) {
+                    console.log('Could not parse error response as JSON');
+                }
+                
+                console.error("API Error:", errorMessage);
+                showFormMessage(errorMessage, 'error');
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+                return;
+            }
+            
+            // Parse successful response
+            let result;
+            try {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    result = await response.json();
+                } else {
+                    throw new Error('Response is not JSON');
+                }
+            } catch (parseError) {
+                console.error("JSON parse error:", parseError);
+                showFormMessage('Server returned an invalid response. Please try again later.', 'error');
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+                return;
+            }
+            
+            console.log("Response data:", result);
+            
+            if (result.success) {
                 // Success
                 showFormMessage(
                     result.message || 'Thank you for your message! I\'ll get back to you soon.',
@@ -154,29 +214,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     submitButton.textContent = originalButtonText;
                 }, 2000);
             } else {
-                // Error from backend
-                let errorMessage = 'An error occurred while sending your message. Please try again.';
-                
-                if (response.status === 429) {
-                    errorMessage = 'Too many requests. Please wait a moment and try again.';
-                } else if (response.status === 422) {
-                    errorMessage = 'Invalid email address. Please check and try again.';
-                } else if (result.detail) {
-                    errorMessage = result.detail;
-                }
-                
+                // Error response from backend
+                let errorMessage = result.detail || 'An error occurred while sending your message. Please try again.';
+                console.error("Backend error:", errorMessage);
                 showFormMessage(errorMessage, 'error');
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;
             }
         } catch (error) {
             // Network or connection errors
+            console.error("Error submitting form:", error);
             let errorMessage = 'Network error. Please check your connection and try again.';
             
             if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
                 errorMessage = 'Unable to connect to the server. Please check your internet connection and try again.';
             } else if (error instanceof SyntaxError) {
                 errorMessage = 'Server returned an invalid response. Please try again later.';
+            } else if (error.message === 'Response is not JSON') {
+                errorMessage = 'Server returned an unexpected response format. Please try again later.';
             }
             
             showFormMessage(errorMessage, 'error');
