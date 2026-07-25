@@ -1,3 +1,6 @@
+// API Configuration
+const API_BASE_URL = "https://portfolio-tpbm.onrender.com";
+
 document.addEventListener('DOMContentLoaded', function() {
     
     // Mobile menu toggle
@@ -112,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Function to submit contact form to backend
     async function submitContactForm(data, formElement) {
-        const apiUrl = window.CONTACT_API_URL || 'http://localhost:8000/api/contact';
+        const apiUrl = `${API_BASE_URL}/api/contact`;
         const submitButton = formElement.querySelector('button[type="submit"]');
         const originalButtonText = submitButton.textContent;
         
@@ -152,20 +155,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 2000);
             } else {
                 // Error from backend
-                showFormMessage(
-                    result.detail || 'An error occurred while sending your message. Please try again.',
-                    'error'
-                );
+                let errorMessage = 'An error occurred while sending your message. Please try again.';
+                
+                if (response.status === 429) {
+                    errorMessage = 'Too many requests. Please wait a moment and try again.';
+                } else if (response.status === 422) {
+                    errorMessage = 'Invalid email address. Please check and try again.';
+                } else if (result.detail) {
+                    errorMessage = result.detail;
+                }
+                
+                showFormMessage(errorMessage, 'error');
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;
             }
         } catch (error) {
-            console.error('Error submitting form:', error);
-            
-            // Show error message
+            // Network or connection errors
             let errorMessage = 'Network error. Please check your connection and try again.';
-            if (error.message === 'Failed to fetch') {
-                errorMessage = 'Unable to connect to the server. Please ensure the backend is running.';
+            
+            if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+                errorMessage = 'Unable to connect to the server. Please check your internet connection and try again.';
+            } else if (error instanceof SyntaxError) {
+                errorMessage = 'Server returned an invalid response. Please try again later.';
             }
             
             showFormMessage(errorMessage, 'error');
@@ -202,21 +213,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (type === 'loading') {
             // Keep loading message until replaced
-        }
-    }
-    
-    // Set API URL (can be overridden by setting window.CONTACT_API_URL)
-    // Default: http://localhost:8000/api/contact (development)
-    // For production, set to your deployed backend URL
-    if (!window.CONTACT_API_URL) {
-        // Auto-detect: use same domain if backend is at /api
-        const protocol = window.location.protocol;
-        const host = window.location.host;
-        window.CONTACT_API_URL = `${protocol}//${host}/api/contact`;
-        
-        // Fallback for development
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            window.CONTACT_API_URL = 'http://localhost:8000/api/contact';
         }
     }
     
