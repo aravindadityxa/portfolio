@@ -35,7 +35,10 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Configure CORS
+# Log CORS configuration
+logger.info(f"Configuring CORS for origins: {settings.ALLOWED_ORIGINS}")
+
+# Configure CORS - MUST be added before route registration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
