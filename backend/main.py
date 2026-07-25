@@ -27,6 +27,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 logger.info(f"Starting FastAPI application (environment={settings.ENVIRONMENT})")
+logger.info(f"Allowed CORS origins: {settings.ALLOWED_ORIGINS}")
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -34,9 +35,6 @@ app = FastAPI(
     description="Contact form backend for portfolio website",
     version="1.0.0"
 )
-
-# Log CORS configuration
-logger.info(f"Configuring CORS for origins: {settings.ALLOWED_ORIGINS}")
 
 # Configure CORS - MUST be added before route registration
 app.add_middleware(

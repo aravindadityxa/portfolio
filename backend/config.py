@@ -49,7 +49,7 @@ class Settings:
     # CORS Configuration
     ALLOWED_ORIGINS: List[str] = [
         origin.strip() 
-        for origin in os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000").split(",")
+        for origin in os.getenv("ALLOWED_ORIGINS", "https://aravindadityxa.github.io,http://localhost:5500,http://127.0.0.1:5500").split(",")
     ]
     
     # Rate Limiting
